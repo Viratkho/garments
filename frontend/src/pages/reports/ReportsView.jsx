@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../../services/api';
+import { useCompany } from '../../context/CompanyContext';
 import { useNotification } from '../../hooks/useNotification';
 import { Button } from '../../components/common/Button';
 import {
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 export const ReportsView = () => {
+  const { company } = useCompany();
   const [downloading, setDownloading] = useState(null);
   const { success, error } = useNotification();
 
@@ -27,10 +29,10 @@ export const ReportsView = () => {
 
       if (type === 'orders') {
         blob = await api.exportOrdersExcel();
-        filename = 'GarmentFlow_Orders_Profitability_Report.xlsx';
+        filename = 'DP_ENTERPRISES_Orders_Profitability_Report.xlsx';
       } else if (type === 'inventory') {
         blob = await api.exportInventoryExcel();
-        filename = 'GarmentFlow_Inventory_Stock_Valuation.xlsx';
+        filename = 'DP_ENTERPRISES_Inventory_Stock_Valuation.xlsx';
       }
 
       const url = window.URL.createObjectURL(blob);
@@ -42,9 +44,31 @@ export const ReportsView = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      success(`${filename} exported successfully!`);
+      success(`${filename} exported successfully for ${company.name}!`);
     } catch (err) {
       error(err.message || 'Export failed');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  const handleDownloadPnlPdf = async () => {
+    setDownloading('pnl-pdf');
+    try {
+      const blob = await api.exportProfitLossPdf();
+      const filename = 'DP_ENTERPRISES_Profit_Loss_Report.pdf';
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      success(`Official Profit & Loss PDF report exported successfully for ${company.name}!`);
+    } catch (err) {
+      error(err.message || 'PDF Export failed');
     } finally {
       setDownloading(null);
     }
@@ -58,42 +82,56 @@ export const ReportsView = () => {
     {
       id: 'orders',
       title: 'Order-wise Profit & Costing Report',
-      description: 'Comprehensive report including contract revenue, material costs, allocated labour, overheads, net margin, and per-piece cost.',
+      description: `Comprehensive manufacturing audit for ${company.name} including contract revenue, material costs, allocated labour, overheads, net margin, and per-piece cost.`,
       icon: DollarSign,
       type: 'EXCEL',
       action: () => handleDownloadExcel('orders'),
+      btnLabel: 'Export Excel (.xlsx)',
     },
     {
       id: 'inventory',
       title: 'Raw Materials & Stock Valuation',
-      description: 'Inventory levels across all fabrics and trims with dynamic weighted average cost calculations and minimum stock status.',
+      description: `Warehouse valuation report across fabrics, trims, and threads with dynamic weighted average cost calculations and minimum stock status.`,
       icon: Layers,
       type: 'EXCEL',
       action: () => handleDownloadExcel('inventory'),
+      btnLabel: 'Export Excel (.xlsx)',
+    },
+    {
+      id: 'pnl-pdf',
+      title: 'Official Profit & Loss PDF Statement',
+      description: `Executive PDF report for ${company.name} showing total contract revenues, actual business expense categories, operating margin, and labour absorption.`,
+      icon: FileText,
+      type: 'PDF',
+      action: handleDownloadPnlPdf,
+      btnLabel: 'Export PDF (.pdf)',
     },
     {
       id: 'pnl',
-      title: 'Annual Profit & Loss Statement',
-      description: 'Official P&L sheet showing total contract revenues, actual business expense categories, operating margin and cash collections.',
+      title: 'Interactive Annual Profit & Loss Statement',
+      description: `Interactive online P&L sheet showing monthly and annual operating margins with double-counting prevention audit notes.`,
       icon: BarChart3,
-      type: 'PRINT',
+      type: 'VIEW',
       action: () => window.location.href = '/profit-loss',
+      btnLabel: 'Open P&L View',
     },
     {
       id: 'salaries',
       title: 'Worker Salary & Labour Allocation Ledger',
-      description: 'Audit report of monthly worker salary disbursements, productive hours, hourly rate snapshots, and order labour shares.',
+      description: `Audit report of monthly worker salary disbursements, productive hours, hourly rate snapshots, and order labour shares.`,
       icon: Users,
       type: 'VIEW',
       action: () => window.location.href = '/salaries',
+      btnLabel: 'View Salary Ledger',
     },
     {
       id: 'production',
       title: '10-Stage Production & Quality Report',
-      description: 'Factory production pipeline log tracking cutting, collar, pocket, assembly, finishing, QC inspection passes, and delivery notes.',
+      description: `Factory production pipeline tracking cutting, collar, pocket, assembly, finishing, QC inspection passes, and delivery notes.`,
       icon: Package,
       type: 'VIEW',
       action: () => window.location.href = '/production',
+      btnLabel: 'View Production Log',
     },
   ];
 
@@ -101,9 +139,14 @@ export const ReportsView = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Business Reports & Export Center</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase tracking-wider">
+              {company.name} Reporting
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Executive Reports & Data Export Center</h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Export transaction logs, order-wise costing audits, and inventory valuations to Excel, PDF or print.
+            Export transaction logs, order-wise costing audits, and inventory valuations to formatted Excel, PDF or print.
           </p>
         </div>
         <Button variant="outline" icon={Printer} onClick={handlePrint}>
@@ -131,15 +174,15 @@ export const ReportsView = () => {
             </div>
 
             <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-[11px] text-gray-400">Real-time database records</span>
+              <span className="text-[11px] text-gray-400">Live database records</span>
               <Button
                 size="sm"
                 variant="primary"
-                icon={r.type === 'EXCEL' ? FileSpreadsheet : Download}
+                icon={r.type === 'EXCEL' ? FileSpreadsheet : (r.type === 'PDF' ? FileText : Download)}
                 loading={downloading === r.id}
                 onClick={r.action}
               >
-                {r.type === 'EXCEL' ? 'Export Excel (.xlsx)' : 'View & Export'}
+                {r.btnLabel}
               </Button>
             </div>
           </div>

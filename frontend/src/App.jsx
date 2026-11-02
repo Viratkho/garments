@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CompanyProvider } from './context/CompanyContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { useAuth } from './hooks/useAuth';
 
@@ -54,44 +55,46 @@ export const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <NotificationProvider>
-          <Routes>
-            {/* Public Auth Route */}
-            <Route path="/login" element={<Login />} />
+        <CompanyProvider>
+          <NotificationProvider>
+            <Routes>
+              {/* Public Auth Route */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Protected ERP Modules */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="companies" element={<CompaniesList />} />
-              <Route path="orders" element={<OrdersList />} />
-              <Route path="orders/:id" element={<OrderDetail />} />
-              <Route path="materials" element={<MaterialsList />} />
-              <Route path="purchases" element={<PurchasesList />} />
-              <Route path="suppliers" element={<SuppliersList />} />
-              <Route path="workers" element={<WorkersList />} />
-              <Route path="attendance" element={<AttendanceView />} />
-              <Route path="salaries" element={<SalaryView />} />
-              <Route path="expenses" element={<ExpensesList />} />
-              <Route path="costing" element={<OrderCostingView />} />
-              <Route path="production" element={<ProductionView />} />
-              <Route path="payments" element={<PaymentsList />} />
-              <Route path="invoices" element={<InvoicesList />} />
-              <Route path="profit-loss" element={<ProfitLossView />} />
-              <Route path="reports" element={<ReportsView />} />
-              <Route path="settings" element={<SettingsView />} />
-            </Route>
+              {/* Protected ERP Modules */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="companies" element={<CompaniesList />} />
+                <Route path="orders" element={<OrdersList />} />
+                <Route path="orders/:id" element={<OrderDetail />} />
+                <Route path="materials" element={<MaterialsList />} />
+                <Route path="purchases" element={<PurchasesList />} />
+                <Route path="suppliers" element={<SuppliersList />} />
+                <Route path="workers" element={<WorkersList />} />
+                <Route path="attendance" element={<AttendanceView />} />
+                <Route path="salaries" element={<SalaryView />} />
+                <Route path="expenses" element={<ExpensesList />} />
+                <Route path="costing" element={<OrderCostingView />} />
+                <Route path="production" element={<ProductionView />} />
+                <Route path="payments" element={<PaymentsList />} />
+                <Route path="invoices" element={<InvoicesList />} />
+                <Route path="profit-loss" element={<ProfitLossView />} />
+                <Route path="reports" element={<ReportsView />} />
+                <Route path="settings" element={<SettingsView />} />
+              </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </NotificationProvider>
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </NotificationProvider>
+        </CompanyProvider>
       </AuthProvider>
     </BrowserRouter>
   );

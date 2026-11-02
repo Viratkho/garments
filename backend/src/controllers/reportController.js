@@ -1,6 +1,7 @@
 const prisma = require('../config/database');
 const costingEngine = require('../services/costingEngine');
 const excelService = require('../services/excelService');
+const pdfService = require('../services/pdfService');
 
 const getProfitLoss = async (req, res, next) => {
   try {
@@ -162,9 +163,96 @@ const exportInventoryExcel = async (req, res, next) => {
   }
 };
 
+const exportProfitLossPdf = async (req, res, next) => {
+  try {
+    const { startDate, endDate, year } = req.query;
+
+    const targetYear = year ? Number(year) : new Date().getFullYear();
+    const periodStart = startDate ? new Date(startDate) : new Date(targetYear, 0, 1);
+    const periodEnd = endDate ? new Date(endDate) : new Date(targetYear, 11, 31, 23, 59, 59, 999);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        orderDate: { gte: periodStart, lte: periodEnd },
+        isArchived: false,
+        status: { not: 'CANCELLED' },
+      },
+    });
+
+    const orderCostings = [];
+    for (const order of orders) {
+      const c = await costingEngine.calculateOrderCosting(order.id);
+      orderCostings.push(c);
+    }
+
+    const totalRevenue = orderCostings.reduce((sum, c) => sum + c.financials.revenue, 0);
+    const totalOrderCost = orderCostings.reduce((sum, c) => sum + c.financials.totalOrderCost, 0);
+    const totalOrderMaterialCost = orderCostings.reduce((sum, c) => sum + c.financials.actualMaterialCost, 0);
+    const totalAllocatedLabourCost = orderCostings.reduce((sum, c) => sum + c.financials.actualLabourCost, 0);
+
+    const expenses = await prisma.expense.findMany({
+      where: {
+        expenseDate: { gte: periodStart, lte: periodEnd },
+        isArchived: false,
+      },
+      include: { category: true },
+    });
+
+    const totalBusinessExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+
+    const expensesByCategory = {};
+    for (const exp of expenses) {
+      const catName = exp.category.name;
+      expensesByCategory[catName] = (expensesByCategory[catName] || 0) + Number(exp.amount);
+    }
+
+    const salaryPayments = await prisma.salaryPayment.findMany({
+      where: {
+        paymentDate: { gte: periodStart, lte: periodEnd },
+      },
+    });
+    const totalSalaryExpenses = salaryPayments.reduce((sum, sp) => sum + Number(sp.amount), 0);
+
+    const unallocatedLabourCost = Math.max(0, Number((totalSalaryExpenses - totalAllocatedLabourCost).toFixed(2)));
+    const labourRecoveryRate = totalSalaryExpenses > 0
+      ? Number(((totalAllocatedLabourCost / totalSalaryExpenses) * 100).toFixed(2))
+      : 0;
+
+    const netOperatingProfit = Number((totalRevenue - totalBusinessExpenses).toFixed(2));
+    const netProfitMargin = totalRevenue > 0 ? Number(((netOperatingProfit / totalRevenue) * 100).toFixed(2)) : 0;
+
+    const pnlData = {
+      period: {
+        startDate: periodStart.toISOString(),
+        endDate: periodEnd.toISOString(),
+      },
+      summary: {
+        totalRevenue: Number(totalRevenue.toFixed(2)),
+        totalBusinessExpenses: Number(totalBusinessExpenses.toFixed(2)),
+        netOperatingProfit,
+        netProfitMargin,
+        totalSalaryExpenses: Number(totalSalaryExpenses.toFixed(2)),
+        totalAllocatedLabourCost: Number(totalAllocatedLabourCost.toFixed(2)),
+        unallocatedLabourCost,
+        labourRecoveryRate,
+        totalOrderMaterialCost: Number(totalOrderMaterialCost.toFixed(2)),
+      },
+      expensesByCategory: Object.entries(expensesByCategory).map(([category, amount]) => ({
+        category,
+        amount: Number(amount.toFixed(2)),
+      })),
+    };
+
+    await pdfService.generateProfitLossPdf(pnlData, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProfitLoss,
   getOrderCostingsReport,
   exportOrdersExcel,
   exportInventoryExcel,
+  exportProfitLossPdf,
 };

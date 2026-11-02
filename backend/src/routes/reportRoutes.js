@@ -11,5 +11,6 @@ router.get('/export/orders-excel', reportController.exportOrdersExcel);
 router.get('/export/orders', reportController.exportOrdersExcel);
 router.get('/export/inventory-excel', reportController.exportInventoryExcel);
 router.get('/export/inventory', reportController.exportInventoryExcel);
+router.get('/export/profit-loss-pdf', reportController.exportProfitLossPdf);
 
 module.exports = router;

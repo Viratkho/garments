@@ -146,6 +146,7 @@ export const api = {
   getOrderCostingsReport: () => request('/reports/order-costings'),
   exportOrdersExcel: () => request('/reports/export/orders-excel'),
   exportInventoryExcel: () => request('/reports/export/inventory-excel'),
+  exportProfitLossPdf: (params = {}) => request(`/reports/export/profit-loss-pdf?${new URLSearchParams(params)}`),
 
   // Dashboard
   getDashboard: () => request('/dashboard'),
@@ -153,4 +154,6 @@ export const api = {
   // Settings
   getSettings: () => request('/settings'),
   updateSettings: (data) => request('/settings', { method: 'PUT', body: JSON.stringify(data) }),
+  uploadLogo: (formData) => request('/settings/logo', { method: 'POST', body: formData }),
+  removeLogo: () => request('/settings/logo', { method: 'DELETE' }),
 };

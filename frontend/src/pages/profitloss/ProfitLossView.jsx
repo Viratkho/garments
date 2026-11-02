@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import { useCompany } from '../../context/CompanyContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { LoadingSpinner } from '../../components/common/EmptyState';
-import { TrendingUp, Calendar, DollarSign, Receipt, PieChart as PieIcon, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, Calendar, DollarSign, Receipt, PieChart as PieIcon, ArrowDownRight, ArrowUpRight, FileText, Download } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
 export const ProfitLossView = () => {
+  const { company } = useCompany();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [pnlData, setPnlData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const fetchPnL = async () => {
     try {
@@ -29,6 +32,25 @@ export const ProfitLossView = () => {
     fetchPnL();
   }, [selectedYear]);
 
+  const handleDownloadPdf = async () => {
+    try {
+      setDownloadingPdf(true);
+      const blob = await api.exportProfitLossPdf({ year: selectedYear });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DP_ENTERPRISES_Profit_Loss_FY${selectedYear}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      console.error('PDF export failed:', e);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
   if (loading || !pnlData) {
     return <LoadingSpinner text="Computing overall Profit & Loss statement..." />;
   }
@@ -41,12 +63,25 @@ export const ProfitLossView = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold text-[#2563EB] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 uppercase tracking-wider">
+              {company.name} Financials
+            </span>
+          </div>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">Business Profit & Loss Statement</h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Comprehensive annual and monthly income statement calculated from actual MySQL sales and expense ledgers.
+            Comprehensive annual income statement for {company.name} calculated from actual MySQL ledgers.
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+            className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-xs transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+            {downloadingPdf ? 'Exporting...' : 'Export PDF'}
+          </button>
           <span className="text-xs font-semibold text-gray-500">Financial Year:</span>
           <select
             value={selectedYear}

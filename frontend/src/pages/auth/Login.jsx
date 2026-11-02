@@ -18,7 +18,7 @@ export const Login = () => {
     setLoading(true);
     try {
       await login(email, password);
-      success('Welcome back to GarmentFlow!');
+      success('Welcome back to DP ENTERPRISES!');
       navigate('/');
     } catch (err) {
       error(err.message || 'Login failed');
@@ -35,13 +35,21 @@ export const Login = () => {
   return (
     <div className="min-h-screen bg-[#F5F7FA] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex p-3 bg-[#172B4D] rounded-xl text-white shadow-md mb-3">
-          <Scissors className="w-8 h-8 text-[#2563EB]" />
+        {/* Typographic DP Monogram Emblem */}
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#172B4D] to-[#0F1B2F] rounded-xl shadow-md border border-blue-500/30 mb-3 select-none">
+          <span className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-300 via-white to-blue-200">
+            DP
+          </span>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-[#172B4D]">GARMENTFLOW</h2>
-        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mt-1">
+        <h2 className="text-2xl font-black tracking-tight text-[#172B4D]">DP ENTERPRISES</h2>
+        <p className="text-xs text-gray-600 font-semibold uppercase tracking-wider mt-1">
           Garment Manufacturing & Business Management
         </p>
+        <div className="mt-2">
+          <span className="inline-flex items-center text-[10px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+            DP ENTERPRISES – GarmentFlow
+          </span>
+        </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">

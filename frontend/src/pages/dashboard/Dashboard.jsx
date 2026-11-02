@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
+import { useCompany } from '../../context/CompanyContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { StatCard } from '../../components/common/StatCard';
 import { Badge } from '../../components/common/Badge';
@@ -34,6 +35,7 @@ import {
 } from 'recharts';
 
 export const Dashboard = () => {
+  const { company } = useCompany();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,8 +70,17 @@ export const Dashboard = () => {
       {/* Top Banner / Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Factory Operations & Business Financials</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Real-time metrics calculated from active shop records.</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold text-[#2563EB] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 uppercase tracking-wider">
+              {company.appTitle}
+            </span>
+          </div>
+          <h1 className="text-2xl font-black text-[#172B4D] tracking-tight">
+            Welcome to {company.name}
+          </h1>
+          <p className="text-xs text-gray-500 mt-0.5 font-medium">
+            Garment Business Management Dashboard • Real-time metrics calculated from active shop records.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Link

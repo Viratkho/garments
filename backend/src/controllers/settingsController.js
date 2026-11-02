@@ -26,17 +26,17 @@ const getSettings = async (req, res, next) => {
 
 const updateSettings = async (req, res, next) => {
   try {
-    const updates = req.body; // e.g. { shop_name: "ABC", productive_monthly_hours: "208", ... }
+    const updates = req.body; // e.g. { shop_name: "DP ENTERPRISES", ... }
 
     const results = [];
     for (const [key, value] of Object.entries(updates)) {
       const setting = await prisma.applicationSetting.upsert({
         where: { settingKey: key },
-        update: { settingValue: String(value) },
+        update: { settingValue: String(value ?? '') },
         create: {
           settingKey: key,
-          settingValue: String(value),
-          settingGroup: 'GENERAL',
+          settingValue: String(value ?? ''),
+          settingGroup: key.startsWith('shop_') ? 'COMPANY' : 'GENERAL',
         },
       });
       results.push(setting);
@@ -52,7 +52,63 @@ const updateSettings = async (req, res, next) => {
   }
 };
 
+const uploadLogo = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No logo image file uploaded' });
+    }
+
+    const logoUrl = `/uploads/${req.file.filename}`;
+
+    const setting = await prisma.applicationSetting.upsert({
+      where: { settingKey: 'shop_logo' },
+      update: { settingValue: logoUrl },
+      create: {
+        settingKey: 'shop_logo',
+        settingValue: logoUrl,
+        settingGroup: 'COMPANY',
+        description: 'Business logo image URL',
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Business logo uploaded successfully',
+      data: {
+        logoUrl,
+        setting,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const removeLogo = async (req, res, next) => {
+  try {
+    await prisma.applicationSetting.upsert({
+      where: { settingKey: 'shop_logo' },
+      update: { settingValue: '' },
+      create: {
+        settingKey: 'shop_logo',
+        settingValue: '',
+        settingGroup: 'COMPANY',
+        description: 'Business logo image URL',
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: 'Logo removed. Typographic DP ENTERPRISES identity restored.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getSettings,
   updateSettings,
+  uploadLogo,
+  removeLogo,
 };

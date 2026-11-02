@@ -10,12 +10,12 @@ async function startServer() {
     await prisma.$connect();
     console.log('✓ Successfully connected to MySQL database: garmentflow_db');
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`====================================================`);
-      console.log(`  GARMENTFLOW Manufacturing ERP Server is running`);
-      console.log(`  Port: http://localhost:${PORT}`);
+      console.log(`  DP ENTERPRISES – GarmentFlow ERP Server running`);
+      console.log(`  Local:        http://localhost:${PORT}`);
       console.log(`  Health Check: http://localhost:${PORT}/api/health`);
-      console.log(`  Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`  Environment:  ${process.env.NODE_ENV || 'development'}`);
       console.log(`====================================================`);
     });
   } catch (error) {

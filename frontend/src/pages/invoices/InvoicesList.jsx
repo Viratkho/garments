@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import { useCompany } from '../../context/CompanyContext';
 import { useNotification } from '../../hooks/useNotification';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Modal } from '../../components/common/Modal';
@@ -10,6 +11,7 @@ import { EmptyState, LoadingSpinner } from '../../components/common/EmptyState';
 import { FileText, Plus, Search, Download, Trash2, Printer } from 'lucide-react';
 
 export const InvoicesList = () => {
+  const { company } = useCompany();
   const [invoices, setInvoices] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -126,9 +128,14 @@ export const InvoicesList = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold text-[#2563EB] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 uppercase tracking-wider">
+              {company.name} Invoicing
+            </span>
+          </div>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">Invoice Management</h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Generate and print official PDF tax invoices with itemized specifications and configurable GST.
+            Generate and print official {company.name} PDF tax invoices with itemized garment specifications and payment balances.
           </p>
         </div>
         <Button onClick={handleOpenCreateModal} icon={Plus}>

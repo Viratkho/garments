@@ -43,7 +43,7 @@ app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    system: 'GARMENTFLOW ERP API',
+    system: 'DP ENTERPRISES – GarmentFlow ERP API',
     database: 'MySQL (Connected)',
     timestamp: new Date().toISOString(),
   });

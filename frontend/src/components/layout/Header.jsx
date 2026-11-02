@@ -1,9 +1,11 @@
 import React from 'react';
 import { Menu, LogOut, User, Bell } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useCompany } from '../../context/CompanyContext';
 
 export const Header = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
+  const { company } = useCompany();
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
@@ -14,8 +16,10 @@ export const Header = ({ onMenuToggle }) => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="hidden sm:block">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">GarmentFlow Workstation</span>
+        <div className="hidden sm:flex items-center">
+          <span className="text-xs font-bold text-[#172B4D] tracking-tight">{company.name}</span>
+          <span className="text-xs text-gray-300 mx-2">|</span>
+          <span className="text-xs font-semibold text-gray-500">GarmentFlow Workstation</span>
         </div>
       </div>
 

@@ -1,0 +1,603 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  role      String     @default("ADMIN") // ADMIN, MANAGER
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Company {
+  id            Int        @id @default(autoincrement())
+  name          String
+  code          String     @unique
+  contactPerson String?
+  email         String?
+  phone         String?
+  address       String?    @db.Text
+  gstin         String?
+  notes         String?    @db.Text
+  isArchived    Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  orders        Order[]
+  payments      Payment[]
+  invoices      Invoice[]
+
+  @@map("companies")
+}
+
+model Order {
+  id                  Int                   @id @default(autoincrement())
+  orderNumber         String                @unique
+  companyId           Int
+  title               String
+  description         String?               @db.Text
+  status              String                @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, DELIVERED, CANCELLED
+  pricingMethod       String                @default("PER_PIECE") // PER_PIECE, FIXED_QUOTE
+  totalPieces         Int                   @default(0)
+  unitRate            Decimal?              @db.Decimal(12, 2)
+  totalQuotedAmount   Decimal?              @db.Decimal(12, 2)
+  totalRevenue        Decimal               @default(0.00) @db.Decimal(12, 2)
+  deliveryDate        DateTime?
+  orderDate           DateTime              @default(now())
+  specialInstructions String?               @db.Text
+  designImageUrl      String?               @db.Text
+  isArchived          Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  company             Company               @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  items               OrderItem[]
+  specifications      OrderSpecification[]
+  materialConsumptions MaterialConsumption[]
+  labourAllocations   LabourAllocation[]
+  workLogs            WorkLog[]
+  expenses            Expense[]
+  overheadAllocations OverheadAllocation[]
+  payments            Payment[]
+  invoices            Invoice[]
+  productionUpdates   ProductionUpdate[]
+  qualityRecords      QualityRecord[]
+  deliveries          Delivery[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([orderDate])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  garmentType String
+  description String?  @db.Text
+  color       String?
+  size        String?
+  quantity    Int      @default(0)
+  unitPrice   Decimal  @default(0.00) @db.Decimal(12, 2)
+  totalAmount Decimal  @default(0.00) @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderSpecification {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  specKey    String
+  specValue  String   @db.Text
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_specifications")
+}
+
+model MaterialCategory {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  materials   Material[]
+
+  @@map("material_categories")
+}
+
+model Material {
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  categoryId           Int
+  description          String?               @db.Text
+  unit                 String                @default("METRE") // METRE, ROLL, PIECE, KG, YARD, CONE, PACKET, OTHER
+  openingStock         Decimal               @default(0.00) @db.Decimal(12, 2)
+  currentStock         Decimal               @default(0.00) @db.Decimal(12, 2)
+  minStockLevel        Decimal               @default(0.00) @db.Decimal(12, 2)
+  weightedAvgCost      Decimal               @default(0.00) @db.Decimal(12, 2)
+  isArchived           Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  category             MaterialCategory      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  purchaseItems        PurchaseItem[]
+  materialConsumptions MaterialConsumption[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@index([categoryId])
+  @@map("materials")
+}
+
+model Supplier {
+  id            Int                @id @default(autoincrement())
+  name          String
+  contactPerson String?
+  email         String?
+  phone         String?
+  address       String?            @db.Text
+  gstin         String?
+  notes         String?            @db.Text
+  isArchived    Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  purchases     MaterialPurchase[]
+  expenses      Expense[]
+
+  @@map("suppliers")
+}
+
+model MaterialPurchase {
+  id                Int            @id @default(autoincrement())
+  purchaseNumber    String         @unique
+  supplierId        Int
+  purchaseDate      DateTime       @default(now())
+  invoiceRef        String?
+  paymentStatus     String         @default("PAID") // PAID, PARTIAL, PENDING
+  totalAmount       Decimal        @default(0.00) @db.Decimal(12, 2)
+  paidAmount        Decimal        @default(0.00) @db.Decimal(12, 2)
+  billAttachmentUrl String?        @db.Text
+  notes             String?        @db.Text
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  supplier          Supplier       @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  items             PurchaseItem[]
+
+  @@index([supplierId])
+  @@index([purchaseDate])
+  @@map("material_purchases")
+}
+
+model PurchaseItem {
+  id          Int              @id @default(autoincrement())
+  purchaseId  Int
+  materialId  Int
+  quantity    Decimal          @db.Decimal(12, 2)
+  unit        String
+  unitCost    Decimal          @db.Decimal(12, 2)
+  totalCost   Decimal          @db.Decimal(12, 2)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  purchase    MaterialPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  material    Material         @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseId])
+  @@index([materialId])
+  @@map("purchase_items")
+}
+
+model MaterialConsumption {
+  id               Int      @id @default(autoincrement())
+  orderId          Int
+  materialId       Int
+  source           String   @default("SHOP") // SHOP, COMPANY
+  requiredQuantity Decimal  @default(0.00) @db.Decimal(12, 2)
+  consumedQuantity Decimal  @db.Decimal(12, 2)
+  unitCostSnapshot Decimal  @default(0.00) @db.Decimal(12, 2)
+  totalCost        Decimal  @default(0.00) @db.Decimal(12, 2)
+  wastageQuantity  Decimal  @default(0.00) @db.Decimal(12, 2)
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  material         Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([materialId])
+  @@map("material_consumption")
+}
+
+model InventoryTransaction {
+  id              Int      @id @default(autoincrement())
+  materialId      Int
+  transactionType String   // PURCHASE, CONSUMPTION, RETURN, ADJUSTMENT, WASTAGE
+  quantity        Decimal  @db.Decimal(12, 2)
+  unitCost        Decimal  @default(0.00) @db.Decimal(12, 2)
+  referenceType   String?  // PURCHASE, ORDER, MANUAL
+  referenceId     String?
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  material        Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@index([materialId])
+  @@index([createdAt])
+  @@map("inventory_transactions")
+}
+
+model Worker {
+  id                      Int                @id @default(autoincrement())
+  name                    String
+  phone                   String?
+  address                 String?            @db.Text
+  joiningDate             DateTime           @default(now())
+  salaryType              String             @default("MONTHLY") // MONTHLY, DAILY, PER_PIECE, MONTHLY_WITH_ADDITIONS
+  agreedSalary            Decimal            @default(0.00) @db.Decimal(12, 2)
+  productiveHoursPerMonth Int                @default(200)
+  status                  String             @default("ACTIVE") // ACTIVE, INACTIVE
+  notes                   String?            @db.Text
+  isArchived              Boolean            @default(false)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  attendances             Attendance[]
+  workLogs                WorkLog[]
+  salaryRecords           SalaryRecord[]
+  salaryPayments          SalaryPayment[]
+  labourAllocations       LabourAllocation[]
+
+  @@map("workers")
+}
+
+model Attendance {
+  id            Int      @id @default(autoincrement())
+  workerId      Int
+  date          DateTime @db.Date
+  status        String   @default("PRESENT") // PRESENT, ABSENT, HALF_DAY, LEAVE
+  workHours     Decimal  @default(8.00) @db.Decimal(5, 2)
+  overtimeHours Decimal  @default(0.00) @db.Decimal(5, 2)
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  worker        Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@unique([workerId, date])
+  @@index([workerId])
+  @@index([date])
+  @@map("attendance")
+}
+
+model WorkLog {
+  id             Int      @id @default(autoincrement())
+  workerId       Int
+  orderId        Int?
+  date           DateTime @default(now())
+  hoursWorked    Decimal  @default(0.00) @db.Decimal(6, 2)
+  piecesProduced Int      @default(0)
+  ratePerUnit    Decimal  @default(0.00) @db.Decimal(12, 2)
+  calculatedPay  Decimal  @default(0.00) @db.Decimal(12, 2)
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  worker         Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  order          Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([workerId])
+  @@index([orderId])
+  @@map("work_logs")
+}
+
+model SalaryRecord {
+  id              Int             @id @default(autoincrement())
+  workerId        Int
+  monthYear       String          // e.g. "2026-10"
+  salaryDue       Decimal         @default(0.00) @db.Decimal(12, 2)
+  salaryPaid      Decimal         @default(0.00) @db.Decimal(12, 2)
+  advanceDeducted Decimal         @default(0.00) @db.Decimal(12, 2)
+  overtimePay     Decimal         @default(0.00) @db.Decimal(12, 2)
+  additionalPay   Decimal         @default(0.00) @db.Decimal(12, 2)
+  pendingBalance  Decimal         @default(0.00) @db.Decimal(12, 2)
+  status          String          @default("PENDING") // PENDING, PARTIAL, PAID
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  worker          Worker          @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  payments        SalaryPayment[]
+
+  @@unique([workerId, monthYear])
+  @@index([workerId])
+  @@map("salary_records")
+}
+
+model SalaryPayment {
+  id             Int           @id @default(autoincrement())
+  salaryRecordId Int?
+  workerId       Int
+  amount         Decimal       @db.Decimal(12, 2)
+  paymentDate    DateTime      @default(now())
+  paymentMethod  String        @default("CASH") // CASH, UPI, BANK_TRANSFER, CHEQUE
+  referenceNo    String?
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+
+  salaryRecord   SalaryRecord? @relation(fields: [salaryRecordId], references: [id], onDelete: SetNull)
+  worker         Worker        @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([salaryRecordId])
+  @@index([workerId])
+  @@map("salary_payments")
+}
+
+model LabourAllocation {
+  id                 Int      @id @default(autoincrement())
+  orderId            Int
+  workerId           Int
+  allocationMethod   String   @default("HOUR_BASED") // HOUR_BASED, PRODUCTION_BASED, MANUAL
+  hoursWorked        Decimal  @default(0.00) @db.Decimal(8, 2)
+  hourlyRateSnapshot Decimal  @default(0.00) @db.Decimal(12, 2)
+  piecesProduced     Int      @default(0)
+  pieceRateSnapshot  Decimal  @default(0.00) @db.Decimal(12, 2)
+  allocatedCost      Decimal  @default(0.00) @db.Decimal(12, 2)
+  notes              String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  worker             Worker   @relation(fields: [workerId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([workerId])
+  @@map("labour_allocations")
+}
+
+model ExpenseCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  isOverhead  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expenses    Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id                  Int                  @id @default(autoincrement())
+  expenseNumber       String               @unique
+  expenseDate         DateTime             @default(now())
+  categoryId          Int
+  description         String?              @db.Text
+  amount              Decimal              @db.Decimal(12, 2)
+  orderId             Int?
+  paymentMethod       String               @default("CASH") // CASH, UPI, BANK_TRANSFER, CHEQUE
+  supplierId          Int?
+  receiptUrl          String?              @db.Text
+  isOverhead          Boolean              @default(false)
+  isArchived          Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  category            ExpenseCategory      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  order               Order?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  supplier            Supplier?            @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  overheadAllocations OverheadAllocation[]
+
+  @@index([categoryId])
+  @@index([orderId])
+  @@index([expenseDate])
+  @@map("expenses")
+}
+
+model OverheadAllocation {
+  id               Int      @id @default(autoincrement())
+  expenseId        Int
+  orderId          Int
+  allocationMethod String   @default("EQUAL") // MANUAL, EQUAL, QUANTITY_BASED
+  allocatedAmount  Decimal  @db.Decimal(12, 2)
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  expense          Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([expenseId])
+  @@index([orderId])
+  @@map("overhead_allocations")
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  paymentNumber String   @unique
+  orderId       Int?
+  companyId     Int
+  amount        Decimal  @db.Decimal(12, 2)
+  paymentDate   DateTime @default(now())
+  paymentMethod String   @default("BANK_TRANSFER") // CASH, UPI, BANK_TRANSFER, CHEQUE, OTHER
+  paymentType   String   @default("ADVANCE") // ADVANCE, INSTALMENT, FINAL_SETTLEMENT
+  referenceNo   String?
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  order         Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([companyId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  invoiceNumber String        @unique
+  orderId       Int
+  companyId     Int
+  invoiceDate   DateTime      @default(now())
+  dueDate       DateTime?
+  subtotal      Decimal       @default(0.00) @db.Decimal(12, 2)
+  discount      Decimal       @default(0.00) @db.Decimal(12, 2)
+  taxPercent    Decimal       @default(0.00) @db.Decimal(5, 2)
+  taxAmount     Decimal       @default(0.00) @db.Decimal(12, 2)
+  totalAmount   Decimal       @default(0.00) @db.Decimal(12, 2)
+  paidAmount    Decimal       @default(0.00) @db.Decimal(12, 2)
+  balanceDue    Decimal       @default(0.00) @db.Decimal(12, 2)
+  status        String        @default("ISSUED") // DRAFT, ISSUED, PAID, PARTIAL, CANCELLED
+  notes         String?       @db.Text
+  terms         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  items         InvoiceItem[]
+
+  @@index([orderId])
+  @@index([companyId])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int
+  description String   @db.Text
+  quantity    Decimal  @db.Decimal(12, 2)
+  unit        String   @default("PIECE")
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  totalAmount Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model ProductionStage {
+  id                Int                @id @default(autoincrement())
+  stageName         String             @unique
+  stageOrder        Int
+  description       String?            @db.Text
+  isDefault         Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+
+  productionUpdates ProductionUpdate[]
+  qualityRecords    QualityRecord[]
+
+  @@map("production_stages")
+}
+
+model ProductionUpdate {
+  id                Int             @id @default(autoincrement())
+  orderId           Int
+  stageId           Int
+  completedQuantity Int             @default(0)
+  defectiveQuantity Int             @default(0)
+  reworkQuantity    Int             @default(0)
+  wastageRecorded   Decimal         @default(0.00) @db.Decimal(12, 2)
+  status            String          @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED
+  notes             String?         @db.Text
+  updatedBy         String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stage             ProductionStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, stageId])
+  @@index([orderId])
+  @@index([stageId])
+  @@map("production_updates")
+}
+
+model QualityRecord {
+  id                Int             @id @default(autoincrement())
+  orderId           Int
+  stageId           Int
+  inspectedQuantity Int             @default(0)
+  approvedQuantity  Int             @default(0)
+  rejectedQuantity  Int             @default(0)
+  defectReason      String?         @db.Text
+  inspectionDate    DateTime        @default(now())
+  inspectorName     String?
+  status            String          @default("PASSED") // PASSED, REWORK_REQUIRED, FAILED
+  notes             String?         @db.Text
+  createdAt         DateTime        @default(now())
+
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stage             ProductionStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([stageId])
+  @@map("quality_records")
+}
+
+model Delivery {
+  id                Int      @id @default(autoincrement())
+  deliveryNumber    String   @unique
+  orderId           Int
+  deliveryDate      DateTime @default(now())
+  deliveredQuantity Int      @default(0)
+  recipientName     String?
+  recipientContact  String?
+  trackingNumber    String?
+  status            String   @default("DELIVERED") // SCHEDULED, IN_TRANSIT, DELIVERED, RETURNED
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now())
+
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("deliveries")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String
+  entity    String
+  entityId  String?
+  details   String?  @db.Text
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model ApplicationSetting {
+  id          Int      @id @default(autoincrement())
+  settingKey  String   @unique
+  settingValue String  @db.Text
+  settingGroup String   @default("GENERAL") // GENERAL, FINANCIAL, PRODUCTION, COMPANY
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("application_settings")
+}

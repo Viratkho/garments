@@ -1,5 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useCompany } from '../../context/CompanyContext';
+import { CompanyLogo } from '../common/CompanyLogo';
 import {
   LayoutDashboard,
   Building2,
@@ -90,16 +92,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
         }`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between h-16 px-5 border-b border-white/10 bg-[#0F1B2F]">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-1.5 bg-[#2563EB] rounded-md text-white shadow-sm">
-              <Scissors className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold tracking-tight text-white leading-none">GARMENTFLOW</h1>
-              <p className="text-[10px] text-gray-400 font-medium tracking-wide mt-1">Manufacturing ERP</p>
-            </div>
-          </div>
+        <div className="flex items-center justify-between h-16 px-4 border-b border-white/10 bg-[#0F1B2F]">
+          <CompanyLogo size="md" showText={true} />
           <button
             onClick={onClose}
             className="lg:hidden p-1 text-gray-400 hover:text-white rounded-md hover:bg-white/5"
@@ -145,7 +139,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between text-gray-400">
             <span className="text-[11px] font-medium text-emerald-400 flex items-center">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1.5"></span>
-              MySQL Live
+              DP ENTERPRISES • Live
             </span>
             <span className="text-[10px] text-gray-400">v1.0.0</span>
           </div>

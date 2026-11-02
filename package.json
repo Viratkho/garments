@@ -1,0 +1,33 @@
+{
+  "name": "dp-enterprises-garmentflow",
+  "version": "1.0.0",
+  "description": "DP ENTERPRISES – Garment Manufacturing, Bulk Order, Stitching and Business Management System",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "test": "cd backend && node tests/comprehensiveAuditTest.js",
+    "test:acceptance": "cd backend && node tests/acceptanceTest.js",
+    "verify": "node scripts/verify-system.js",
+    "prisma:generate": "cd backend && npx prisma generate",
+    "prisma:push": "cd backend && npx prisma db push",
+    "prisma:seed": "cd backend && node prisma/seed.js"
+  },
+  "keywords": [
+    "garment-manufacturing",
+    "erp",
+    "manufacturing",
+    "dp-enterprises",
+    "order-costing",
+    "inventory-management",
+    "payroll"
+  ],
+  "author": "DP ENTERPRISES",
+  "license": "MIT"
+}

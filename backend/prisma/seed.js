@@ -87,12 +87,15 @@ async function main() {
   }
   console.log('✓ Expense categories seeded');
 
-  // 5. Application Settings
+  // 5. Application Settings (Branded for DP ENTERPRISES)
   const settings = [
-    { settingKey: 'shop_name', settingValue: 'GarmentFlow Manufacturing Works', settingGroup: 'COMPANY', description: 'Registered business name' },
-    { settingKey: 'shop_address', settingValue: 'Plot 42, Garment Industrial Area, Sector 5, Industrial Zone', settingGroup: 'COMPANY', description: 'Shop physical address' },
-    { settingKey: 'shop_phone', settingValue: '+91 98765 43210', settingGroup: 'COMPANY', description: 'Primary phone contact' },
-    { settingKey: 'shop_email', settingValue: 'orders@garmentflow.com', settingGroup: 'COMPANY', description: 'Business email' },
+    { settingKey: 'shop_name', settingValue: 'DP ENTERPRISES', settingGroup: 'COMPANY', description: 'Official business name' },
+    { settingKey: 'app_title', settingValue: 'DP ENTERPRISES – GarmentFlow', settingGroup: 'COMPANY', description: 'Application title' },
+    { settingKey: 'app_description', settingValue: 'Garment Manufacturing, Bulk Order, Stitching and Business Management System', settingGroup: 'COMPANY', description: 'Business description' },
+    { settingKey: 'shop_logo', settingValue: '', settingGroup: 'COMPANY', description: 'Business logo URL (optional)' },
+    { settingKey: 'shop_address', settingValue: '', settingGroup: 'COMPANY', description: 'Shop physical address' },
+    { settingKey: 'shop_phone', settingValue: '', settingGroup: 'COMPANY', description: 'Primary phone contact' },
+    { settingKey: 'shop_email', settingValue: '', settingGroup: 'COMPANY', description: 'Business email' },
     { settingKey: 'shop_gstin', settingValue: '', settingGroup: 'COMPANY', description: 'GSTIN (Optional)' },
     { settingKey: 'gst_enabled', settingValue: 'false', settingGroup: 'FINANCIAL', description: 'Enable GST on invoices (false if unregistered)' },
     { settingKey: 'default_gst_percent', settingValue: '5.0', settingGroup: 'FINANCIAL', description: 'Default GST percentage when enabled' },
