@@ -20,6 +20,7 @@ export function InteractiveBarChart({
   secondaryLabel,
   primaryColor = "#8B5CF6",
   secondaryColor = "#D50000",
+  negativeColor = "#D50000",
   currency,
   height = 230,
 }: {
@@ -28,14 +29,28 @@ export function InteractiveBarChart({
   secondaryLabel?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  negativeColor?: string;
   currency?: CurrencyCode;
   height?: number;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const maxVal = Math.max(
-    1,
-    ...data.flatMap((d) => [Math.abs(d.primary), Math.abs(d.secondary ?? 0)])
+  const hasNegative = data.some(
+    (d) => d.primary < 0 || (d.secondary ?? 0) < 0
   );
+  const maxPos = Math.max(
+    1,
+    ...data.flatMap((d) => [Math.max(0, d.primary), Math.max(0, d.secondary ?? 0)])
+  );
+  const maxNeg = Math.max(
+    0,
+    ...data.flatMap((d) => [
+      Math.max(0, -d.primary),
+      Math.max(0, -(d.secondary ?? 0)),
+    ])
+  );
+  const totalRange = maxPos + maxNeg;
+  const posAreaPct = hasNegative ? (maxPos / totalRange) * 100 : 100;
+  const negAreaPct = hasNegative ? (maxNeg / totalRange) * 100 : 0;
 
   const fmt = (v: number) => (currency ? formatCurrency(v, currency) : formatNumber(v));
 
@@ -59,6 +74,15 @@ export function InteractiveBarChart({
               {secondaryLabel}
             </span>
           )}
+          {hasNegative && !secondaryLabel && (
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <span
+                className="h-2.5 w-2.5 rounded-sm"
+                style={{ backgroundColor: negativeColor }}
+              />
+              Loss
+            </span>
+          )}
         </div>
         {hovered !== null && data[hovered] && (
           <div className="rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated-strong)] px-2.5 py-1 text-xs font-semibold text-[var(--text-primary)] shadow-sm tabular-nums">
@@ -71,7 +95,7 @@ export function InteractiveBarChart({
       </div>
 
       <div
-        className="relative flex items-end justify-between gap-2 border-b border-[var(--border-glass)] pt-4 pb-1"
+        className="relative flex items-stretch justify-between gap-2 border-b border-[var(--border-glass)] pt-4 pb-1"
         style={{ height }}
       >
         {/* Horizontal reference lines */}
@@ -84,13 +108,37 @@ export function InteractiveBarChart({
           ))}
         </div>
 
+        {/* Zero baseline when negative values exist */}
+        {hasNegative && (
+          <div
+            className="pointer-events-none absolute inset-x-0 z-0 border-t border-[var(--border-strong)]"
+            style={{ top: `calc(1rem + (100% - 1.25rem) * ${posAreaPct / 100})` }}
+          />
+        )}
+
         {data.map((item, i) => {
-          const pPct = Math.max(3, (Math.abs(item.primary) / maxVal) * 100);
-          const sPct =
-            item.secondary !== undefined
-              ? Math.max(3, (Math.abs(item.secondary) / maxVal) * 100)
-              : 0;
           const isActive = hovered === i;
+          const pIsNeg = item.primary < 0;
+          const pColor = pIsNeg ? negativeColor : primaryColor;
+          const pPosH =
+            !pIsNeg && item.primary > 0
+              ? Math.max(4, (item.primary / maxPos) * 100)
+              : item.primary === 0
+              ? 2
+              : 0;
+          const pNegH =
+            pIsNeg && maxNeg > 0
+              ? Math.max(6, (Math.abs(item.primary) / maxNeg) * 100)
+              : 0;
+
+          const sVal = item.secondary ?? 0;
+          const sPosH =
+            secondaryLabel && item.secondary !== undefined && sVal >= 0
+              ? sVal === 0
+                ? 2
+                : Math.max(4, (sVal / maxPos) * 100)
+              : 0;
+
           return (
             <div
               key={item.label + i}
@@ -103,16 +151,20 @@ export function InteractiveBarChart({
               aria-label={`${item.label}: ${primaryLabel} ${fmt(item.primary)}${
                 secondaryLabel ? `, ${secondaryLabel} ${fmt(item.secondary ?? 0)}` : ""
               }`}
-              className={`group relative z-10 flex h-full flex-1 flex-col items-center justify-end gap-1.5 rounded-lg px-1 transition focus:outline-none ${
+              className={`group relative z-10 flex h-full flex-1 flex-col items-center rounded-lg px-1 transition focus:outline-none ${
                 isActive ? "bg-[var(--bg-subtle)]" : ""
               }`}
             >
-              <div className="flex h-full w-full max-w-[44px] items-end justify-center gap-1">
+              {/* Positive zone */}
+              <div
+                className="flex w-full max-w-[44px] items-end justify-center gap-1"
+                style={{ height: `${posAreaPct}%` }}
+              >
                 <div
                   className="w-full rounded-t-md transition-all duration-300"
                   style={{
-                    height: `${item.primary === 0 ? 2 : pPct}%`,
-                    backgroundColor: primaryColor,
+                    height: `${pPosH}%`,
+                    backgroundColor: pColor,
                     opacity: hovered !== null && !isActive ? 0.55 : 1,
                   }}
                 />
@@ -120,13 +172,30 @@ export function InteractiveBarChart({
                   <div
                     className="w-full rounded-t-md transition-all duration-300"
                     style={{
-                      height: `${item.secondary === 0 ? 2 : sPct}%`,
+                      height: `${sPosH}%`,
                       backgroundColor: secondaryColor,
                       opacity: hovered !== null && !isActive ? 0.55 : 0.9,
                     }}
                   />
                 )}
               </div>
+
+              {/* Negative (Loss) zone */}
+              {hasNegative && (
+                <div
+                  className="flex w-full max-w-[44px] items-start justify-center gap-1"
+                  style={{ height: `${negAreaPct}%` }}
+                >
+                  <div
+                    className="w-full rounded-b-md transition-all duration-300"
+                    style={{
+                      height: `${pNegH}%`,
+                      backgroundColor: negativeColor,
+                      opacity: hovered !== null && !isActive ? 0.55 : 1,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         })}

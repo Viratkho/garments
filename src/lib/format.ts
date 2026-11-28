@@ -13,7 +13,8 @@ export function formatCurrency(amount: number, currency: CurrencyCode = "INR"): 
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(safe);
 }
 

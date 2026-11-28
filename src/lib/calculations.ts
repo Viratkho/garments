@@ -10,6 +10,10 @@ import type {
   WorkerPaymentType,
 } from "@/types/garmentflow";
 
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 export function computeOrderFinancials(input: {
   quantity: number;
   pricingMethod: PricingMethod;
@@ -26,12 +30,13 @@ export function computeOrderFinancials(input: {
   const labourCost = Math.max(0, Number(input.labourCost) || 0);
   const otherCosts = Math.max(0, Number(input.otherCosts) || 0);
 
-  const orderValue =
+  const orderValue = round2(
     input.pricingMethod === "per-piece"
       ? quantity * perPieceRate
-      : fixedOrderValue;
-  const orderCost = materialCost + labourCost + otherCosts;
-  const expectedProfit = orderValue - orderCost;
+      : fixedOrderValue
+  );
+  const orderCost = round2(materialCost + labourCost + otherCosts);
+  const expectedProfit = round2(orderValue - orderCost);
 
   return { orderValue, orderCost, expectedProfit };
 }

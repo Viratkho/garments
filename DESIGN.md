@@ -33,6 +33,18 @@ typography:
     fontWeight: 600
     lineHeight: 1.3
     letterSpacing: "0.02em"
+  caption:
+    fontFamily: "Manrope, system-ui, -apple-system, sans-serif"
+    fontSize: "0.6875rem"
+    fontWeight: 500
+    lineHeight: 1.3
+    letterSpacing: "0.01em"
+  micro:
+    fontFamily: "Manrope, system-ui, -apple-system, sans-serif"
+    fontSize: "0.625rem"
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: "0.08em"
   mono:
     fontFamily: "JetBrains Mono, ui-monospace, monospace"
     fontSize: "0.75rem"

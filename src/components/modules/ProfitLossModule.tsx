@@ -19,15 +19,16 @@ import { GlassCard, INPUT_CLASS, StatusBadge } from "@/components/ui/GlassPrimit
 export function ProfitLossModule() {
   const { state } = useGarmentFlow();
   const { currency } = state.settings;
-  const now = new Date();
+  const initialYear = useMemo(() => new Date().getFullYear(), []);
+  const initialMonth = useMemo(() => new Date().getMonth() + 1, []);
 
   const [scope, setScope] = useState<"monthly" | "yearly">("monthly");
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(initialMonth);
+  const [year, setYear] = useState(initialYear);
 
   const years = useMemo(
-    () => getAllYearsInState(state, now.getFullYear()),
-    [state, now]
+    () => getAllYearsInState(state, initialYear),
+    [state, initialYear]
   );
 
   const pl = useMemo(

@@ -26,7 +26,7 @@
         "role": "neutral",
         "displayName": "Pearl White",
         "canonical": "#F5F5F0",
-        "tonalRamp": ["#17171D", "#3A3A44", "#6B6B76", "#9D9DA6", "#C8C8CE", "#E5E5DF", "#F5F5F0", "#FFFFFF"]
+        "tonalRamp": ["#17171D", "#3A3A44", "#6B6B76", "#9D9DA6", "#C8C8CE", "#ECECE5", "#ECECE6", "#F5F5F0"]
       },
       "rosso-corsa": {
         "role": "secondary",
@@ -40,6 +40,8 @@
       "title": { "displayName": "Title", "purpose": "Card and dialog section titles." },
       "body": { "displayName": "Body", "purpose": "Form controls, descriptions, and operational copy." },
       "label": { "displayName": "Label", "purpose": "Table headers, field labels, and status pills." },
+      "caption": { "displayName": "Caption", "purpose": "Secondary metadata, timestamps, and chart axis labels." },
+      "micro": { "displayName": "Micro", "purpose": "Compact notification counters and uppercase brand badges." },
       "mono": { "displayName": "Monospace", "purpose": "Order IDs and numeric audit metadata." }
     },
     "shadows": [

@@ -16,14 +16,15 @@ import { GlassCard, INPUT_CLASS, StatusBadge } from "@/components/ui/GlassPrimit
 export function MonthlyEarningsModule() {
   const { state } = useGarmentFlow();
   const { currency } = state.settings;
-  const now = new Date();
+  const initialYear = useMemo(() => new Date().getFullYear(), []);
+  const initialMonth = useMemo(() => new Date().getMonth() + 1, []);
 
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(initialMonth);
+  const [year, setYear] = useState(initialYear);
 
   const years = useMemo(
-    () => getAllYearsInState(state, now.getFullYear()),
-    [state, now]
+    () => getAllYearsInState(state, initialYear),
+    [state, initialYear]
   );
 
   const current = useMemo(
