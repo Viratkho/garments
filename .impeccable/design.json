@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-28T12:36:00+05:30",
+  "title": "Design System: GARMENTFLOW — DP ENTERPRISES",
+  "extensions": {
+    "colorMeta": {
+      "midnight-black": {
+        "role": "neutral",
+        "displayName": "Midnight Black",
+        "canonical": "#0B0B0F",
+        "tonalRamp": ["#0B0B0F", "#121218", "#17171D", "#22222B", "#32323E", "#525264", "#8F8FA3", "#F5F5F0"]
+      },
+      "carbon-black": {
+        "role": "neutral",
+        "displayName": "Carbon Black",
+        "canonical": "#17171D",
+        "tonalRamp": ["#0B0B0F", "#17171D", "#202029", "#2C2C38", "#3D3D4D", "#606075", "#9B9BAE", "#F5F5F0"]
+      },
+      "electric-violet": {
+        "role": "primary",
+        "displayName": "Electric Violet",
+        "canonical": "#8B5CF6",
+        "tonalRamp": ["#2E1065", "#4C1D95", "#6D28D9", "#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD", "#EDE9FE"]
+      },
+      "pearl-white": {
+        "role": "neutral",
+        "displayName": "Pearl White",
+        "canonical": "#F5F5F0",
+        "tonalRamp": ["#17171D", "#3A3A44", "#6B6B76", "#9D9DA6", "#C8C8CE", "#E5E5DF", "#F5F5F0", "#FFFFFF"]
+      },
+      "rosso-corsa": {
+        "role": "secondary",
+        "displayName": "Rosso Corsa",
+        "canonical": "#D50000",
+        "tonalRamp": ["#450000", "#7F0000", "#A80000", "#D50000", "#EF4444", "#F87171", "#FCA5A5", "#FEE2E2"]
+      }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Top-bar module headers and KPI totals." },
+      "title": { "displayName": "Title", "purpose": "Card and dialog section titles." },
+      "body": { "displayName": "Body", "purpose": "Form controls, descriptions, and operational copy." },
+      "label": { "displayName": "Label", "purpose": "Table headers, field labels, and status pills." },
+      "mono": { "displayName": "Monospace", "purpose": "Order IDs and numeric audit metadata." }
+    },
+    "shadows": [
+      {
+        "name": "glass-elevation",
+        "value": "0 18px 42px -18px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(245, 245, 240, 0.07)",
+        "purpose": "Ambient glass card lift in dark mode."
+      },
+      {
+        "name": "violet-action",
+        "value": "0 10px 24px -10px rgba(139, 92, 246, 0.72)",
+        "purpose": "Primary CTA hover emphasis."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Snappy deceleration for toggle knob and interactive lifts."
+      },
+      {
+        "name": "ink-pour",
+        "value": "cubic-bezier(0.55, 0.04, 0.25, 1)",
+        "purpose": "860ms organic ink-spread View Transition between themes."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary Electric Violet operational action button.",
+      "html": "<button class=\"ds-btn-primary\">Save Order</button>",
+      "css": ".ds-btn-primary { background: #8B5CF6; color: #F5F5F0; border: 0; border-radius: 12px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease; } .ds-btn-primary:hover { background: #7C3AED; box-shadow: 0 10px 24px -10px rgba(139, 92, 246, 0.72); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #8B5CF6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Glass Panel",
+      "kind": "card",
+      "refersTo": "card-glass",
+      "description": "Frosted Carbon Black container for KPIs, tables, and charts.",
+      "html": "<div class=\"ds-card-glass\"><strong>Monthly Revenue</strong><p style=\"margin-top:6px;font-size:20px;font-weight:800;\">₹2,96,750</p></div>",
+      "css": ".ds-card-glass { background: rgba(23, 23, 29, 0.72); color: #F5F5F0; border: 1px solid rgba(245, 245, 240, 0.11); border-radius: 16px; padding: 20px; backdrop-filter: blur(18px); }"
+    },
+    {
+      "name": "Form Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Recessed Midnight Black text field with Electric Violet focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Company / Customer Name\" />",
+      "css": ".ds-input { width: 100%; background: rgba(11, 11, 15, 0.65); color: #F5F5F0; border: 1px solid rgba(245, 245, 240, 0.11); border-radius: 12px; padding: 10px 14px; font-size: 14px; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; } .ds-input:focus { border-color: #8B5CF6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Precision Stitch Ledger",
+    "overview": "GARMENTFLOW translates DP ENTERPRISES's daily garment manufacturing operations—bulk stitching contracts, fabric yardage, worker attendance, and profit/loss reconciliation—into an industrial-grade glassmorphic operations cockpit. Rather than borrowing generic pastel SaaS themes, it commits strictly to a five-color material system anchored by Midnight Black and Pearl White grounds, Carbon Black frosted panels, Electric Violet active highlights, and Rosso Corsa critical alerts.",
+    "keyCharacteristics": [
+      "Strict five-color brand discipline across Dark and Light modes",
+      "Frosted glassmorphism containers with crisp hairline borders",
+      "Tabular numeric alignment for INR (₹) valuations, quantities, and working hours",
+      "Organic View-Transition ink-spread theme switching with reduced-motion fallback"
+    ],
+    "rules": [
+      {
+        "name": "The Five-Color Discipline Rule",
+        "body": "Never introduce unanchored accent colors; operational highlights belong exclusively to Electric Violet (#8B5CF6), critical/loss states to Rosso Corsa (#D50000), and positive financial confirmation to restrained semantic green (#22C55E).",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do enforce tabular-nums on every currency figure, piece count, working-hour readout, and order ID.",
+      "Do preserve high text contrast (>= 4.5:1) across all seven background presets in both Dark and Light modes.",
+      "Do respect prefers-reduced-motion on both KPI count-ups and the ink-spread theme transition."
+    ],
+    "donts": [
+      "Don't introduce unrelated decorative accent colors outside the five-color system.",
+      "Don't add payment gateways, customer checkout flows, or e-commerce tropes.",
+      "Don't double-count stock consumption or worker salary ledgers on top of order-level material/labour costs in Profit & Loss."
+    ]
+  }
+}
